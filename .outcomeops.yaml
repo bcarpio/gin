@@ -1,0 +1,39 @@
+# .outcomeops.yaml - OutcomeOps AI Assist repository configuration
+#
+# gin-gonic/gin connected as the Go reference/test repository for OutcomeOps:
+# validates Go code-maps + symbol-graph extraction end-to-end, and serves as the
+# verification target for the ADR-055 Go cross-module resolver. Not a code-gen
+# target.
+
+version: "1.0"
+
+code_generation:
+  # Selects the Go backend in analyze-pr (PR-Check) file scoping and in
+  # generate-code. Must match a registered backend.
+  backend: "go"
+
+project_context: |
+  gin-gonic/gin - a high-performance HTTP web framework written in Go.
+  Multiple packages (gin, binding, render) with real cross-package calls,
+  used here to exercise the Go symbol-graph extractor and the ADR-055
+  Go reference resolver.
+
+# Testing (informational for a reference repo; Go uses `go test`).
+testing:
+  framework: "go test"
+  test_directory: "."
+  min_coverage: 0
+
+# Document ingestion + symbol-graph extraction.
+ingestion:
+  symbol_graph:
+    enabled: true
+    # Allow-list: extract Go facts only (must be a subset of the registered
+    # languages). Keeps the first live Go ingest unambiguous.
+    languages: ["go"]
+    # Skip generated/vendored trees and test-data noise so the fact set
+    # reflects real cross-package structure. ADR-009 base excludes still apply.
+    exclude:
+      - "**/testdata/**"
+      - "vendor/**"
+    max_file_bytes: 524288  # 512 KiB
